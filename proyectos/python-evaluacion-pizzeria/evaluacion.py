@@ -46,36 +46,47 @@ def convertir_desde_eur(monto_eur: float, moneda_destino: str) -> float:
 def calcular():
     raw = entrada_puntuacion.get().strip().replace(",", ".")
     moneda = combo_moneda.get().strip().upper()
+    anios_raw = entrada_anios.get().strip()
 
-    # Validaciones básicas
     if not raw:
         messagebox.showwarning("Falta dato", "Ingresa la puntuación.")
         return
     if moneda not in ("EUR", "USD", "MXN"):
         messagebox.showwarning("Moneda inválida", "Elige EUR, USD o MXN.")
         return
-
-    # Número
     try:
         p = float(raw)
     except ValueError:
         messagebox.showerror("Error", "La puntuación debe ser numérica (ej. 0.0, 0.4, 0.6).")
         return
+    try:
+        anios = int(anios_raw or "0")
+        if anios < 0: raise ValueError()
+    except ValueError:
+        messagebox.showerror("Error", "Años de antigüedad debe ser un entero ≥ 0.")
+        return
 
-    # Reglas del ejercicio
     nivel, ok = nivel_y_valor(p)
     if not ok:
-        messagebox.showwarning("Puntuación no válida",
-                               "Solo se aceptan 0.0, 0.4 o 0.6 en adelante.")
+        messagebox.showwarning("Puntuación no válida", "Solo se aceptan 0.0, 0.4 o ≥0.6.")
         lbl_resultado.config(text="—")
         return
 
-    dinero_eur = BONO_BASE_EUR * p
-    dinero_out = convertir_desde_eur(dinero_eur, moneda)
+    # Fórmula B (Luis): € por año (100€/año hasta 5; luego 50€/año)
+    extra_eur = min(anios, 5) * 100.0 + max(anios - 5, 0) * 50.0
+    dinero_eur = BONO_BASE_EUR * p + extra_eur
 
+    dinero_out = convertir_desde_eur(dinero_eur, moneda)
+    extra_out = convertir_desde_eur(extra_eur, moneda)
     lbl_resultado.config(
-        text=f"Nivel: {nivel}\nPuntuación: {p}\nDinero a recibir: {formatea(dinero_out, moneda)}"
+        text=(
+            f"Nivel: {nivel}\n"
+            f"Puntuación: {p}\n"
+            f"Antigüedad: {anios} años (extra {formatea(extra_out, moneda)})\n"
+            f"Dinero a recibir: {formatea(dinero_out, moneda)}"
+        )
     )
+
 
 # --- UI ---
 root = tk.Tk()
@@ -98,15 +109,22 @@ combo_moneda = ttk.Combobox(frm, values=["EUR", "USD", "MXN"], width=15, state="
 combo_moneda.grid(row=1, column=1, sticky="w", padx=8, pady=(8,0))
 combo_moneda.set("EUR")
 
+# Fila 2: Antigüedad
+ttk.Label(frm, text="Años de antigüedad:").grid(row=2, column=0, sticky="w", pady=(8,0))
+entrada_anios = ttk.Entry(frm, width=10)
+entrada_anios.grid(row=2, column=1, sticky="w", padx=8, pady=(8,0))
+entrada_anios.insert(0, "0")
+entrada_anios.bind("<Return>", lambda *_: calcular())
+
+
 # Botón Calcular
 btn = ttk.Button(frm, text="Calcular", command=calcular)
 btn.grid(row=0, column=2, rowspan=2, padx=12)
 
-ttk.Separator(frm, orient="horizontal").grid(row=2, column=0, columnspan=3, sticky="ew", pady=12)
-
+ttk.Separator(frm, orient="horizontal").grid(row=3, column=0, columnspan=3, sticky="ew", pady=12)
 # Resultado
 lbl_resultado = ttk.Label(frm, text="—", font=("Segoe UI", 11, "bold"))
-lbl_resultado.grid(row=3, column=0, columnspan=3, sticky="w")
+lbl_resultado.grid(row=4, column=0, columnspan=3, sticky="w")
 
 # Accesos rápidos
 entrada_puntuacion.bind("<Return>", lambda *_: calcular())
