@@ -48,6 +48,7 @@ def calcular():
     moneda = combo_moneda.get().strip().upper()
     anios_raw = entrada_anios.get().strip()
 
+    # Validaciones
     if not raw:
         messagebox.showwarning("Falta dato", "Ingresa la puntuación.")
         return
@@ -87,7 +88,6 @@ def calcular():
         )
     )
 
-
 # --- UI ---
 root = tk.Tk()
 root.title("Evaluación de empleados")
@@ -116,12 +116,12 @@ entrada_anios.grid(row=2, column=1, sticky="w", padx=8, pady=(8,0))
 entrada_anios.insert(0, "0")
 entrada_anios.bind("<Return>", lambda *_: calcular())
 
-
 # Botón Calcular
 btn = ttk.Button(frm, text="Calcular", command=calcular)
 btn.grid(row=0, column=2, rowspan=2, padx=12)
 
 ttk.Separator(frm, orient="horizontal").grid(row=3, column=0, columnspan=3, sticky="ew", pady=12)
+
 # Resultado
 lbl_resultado = ttk.Label(frm, text="—", font=("Segoe UI", 11, "bold"))
 lbl_resultado.grid(row=4, column=0, columnspan=3, sticky="w")
@@ -138,3 +138,4 @@ y = (root.winfo_screenheight() - h) // 2
 root.geometry(f"{w}x{h}+{x}+{y}")
 
 root.mainloop()
+
