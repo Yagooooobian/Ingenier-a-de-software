@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-BONO_BASE_EUR = 2600.0 #cambio luis
+BONO_BASE_EUR = 2550.0  # valor final tras resolver conflicto
 
 # Tasas de ejemplo: 1 EUR -> X moneda
 RATES = {
